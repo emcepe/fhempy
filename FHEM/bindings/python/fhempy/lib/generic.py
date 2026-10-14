@@ -176,6 +176,21 @@ class FhemModule:
         except FileNotFoundError:
             return f"No README.md file found for {self.hash['FHEMPYTYPE']}."
 
+    @staticmethod
+    def validate_define(args, argsh):
+        """Optionally return an error/usage string, or None for valid arguments.
+
+        This must be a quick, synchronous argument check without I/O or state
+        changes. The binding calls it before replacing an initialized device
+        of the same type, and after loading a module for a new device. First
+        loads are already acknowledged; their errors are reported in state.
+
+        Keep validation rules and usage text in the module. Define may reuse
+        this hook, including when running with an older binding. Modules that
+        do not override it retain their existing behaviour.
+        """
+        return None
+
     # FHEM FUNCTION
     async def Define(self, hash, args, argsh):
         self.hash = hash
