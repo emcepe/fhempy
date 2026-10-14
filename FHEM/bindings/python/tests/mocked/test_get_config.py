@@ -91,7 +91,7 @@ async def test_all_command_help_is_serialized_without_changing_quotes(device, mo
     expected = help_text.replace("\n", "<br>")
     assert config == {"set": {"update": expected}, "get": {"status": expected}, "attr": {"interval": expected}}
     assert output.lower().count("</script>") == 1
-    assert 'bindHelp("get", "idGetHelp", "div.makeTable.internals")' in output
+    assert 'bindHelp("get", "idGetHelp")' in output
 
 
 @pytest.mark.asyncio

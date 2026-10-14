@@ -72,9 +72,10 @@ class FhemModule:
           document.getElementById("fhempyReadme").style.display = "none";
 
           var helpConfig = ###COMMAND_HELP_CONFIG###;
-          function bindHelp(kind, helpId, before) {
+          function bindHelp(kind, helpId) {
+            var select = $("select." + kind);
             function updateHelp() {
-              var cmd = $("select." + kind).val();
+              var cmd = select.val();
               var help = helpConfig[kind][cmd];
               if (!help) {
                 $("#" + helpId).remove();
@@ -82,16 +83,16 @@ class FhemModule:
               }
               if (document.getElementById(helpId) === null) {
                 $("<div>", {id: helpId, "class": "makeTable help"})
-                  .insertBefore(before);
+                  .insertAfter(select.closest("div.makeSelect"));
               }
               $("#" + helpId).html(help + "<br>");
             }
-            $("select." + kind).change(updateHelp);
+            select.change(updateHelp);
             updateHelp();
           }
-          bindHelp("set", "idCmdHelp", "div.makeTable.internals");
-          bindHelp("get", "idGetHelp", "div.makeTable.internals");
-          bindHelp("attr", "idAttrHelp", "div.makeTable.attributes");
+          bindHelp("set", "idCmdHelp");
+          bindHelp("get", "idGetHelp");
+          bindHelp("attr", "idAttrHelp");
 
           var helpLink = document.getElementById("content")
             .getElementsByClassName("detLink");
