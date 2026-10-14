@@ -373,6 +373,7 @@ class fhempy:
         fhem.setFunctionActive(hash)
         # load module
         nmInstance = None
+        redefine = False
         if hash["function"] == "Rename":
             new_name = hash["args"][0]
             old_name = hash["args"][1]
@@ -397,6 +398,11 @@ class fhempy:
                         await self.sendBackReturn(hash, error)
                         return 0
                 # this code is called on defmod
+                previous = loadedModuleInstances[hash["NAME"]]
+                redefine = getattr(previous, "hash", None) is not None and (
+                    getattr(previous, "_defargs", None) != hash["args"]
+                    or getattr(previous, "_defargsh", None) != hash["argsh"]
+                )
                 # if module is loaded and Define is called, do Undefine first
                 # call undefine
                 hash["function"] = "Undefine"
@@ -424,7 +430,7 @@ class fhempy:
 
                     module_object = await self.import_module(hash)
 
-                    await self.define_module(hash, module_object)
+                    await self.define_module(hash, module_object, redefine=redefine)
                 except ModuleDisabledException:
                     return 0
                 except ModuleDefineException as exc:
@@ -520,7 +526,7 @@ class fhempy:
             return validate(hash["args"], hash["argsh"])
         return validate(hash["defargs"], hash["defargsh"])
 
-    async def define_module(self, hash, module_object):
+    async def define_module(self, hash, module_object, redefine=False):
         # create instance of class with logger
         target_class = getattr(module_object, hash["FHEMPYTYPE"])
         error = self._validate_define(target_class, hash)
@@ -531,7 +537,11 @@ class fhempy:
         info = await fhem.getDeviceInfo(hash["NAME"], {"verbose": "3", "disable": "0"})
         moduleLogger.setLevel(self.getLogLevel(info["attr"]["verbose"]))
 
-        loadedModuleInstances[hash["NAME"]] = target_class(moduleLogger)
+        nmInstance = target_class(moduleLogger)
+        loadedModuleInstances[hash["NAME"]] = nmInstance
+        # Keep lifecycle context on the instance, not in FHEM's device internals.
+        if isinstance(nmInstance, generic.FhemModule):
+            nmInstance._is_redefine = redefine
 
         # check if module is disabled
         disabled = info["attr"]["disable"] == "1"
