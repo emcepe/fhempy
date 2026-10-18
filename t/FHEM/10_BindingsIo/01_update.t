@@ -61,7 +61,9 @@ require $module unless defined &BindingsIo_Set;
     ok(!exists $hash->{READINGS}{version_options}, 'installed choice creates no reading');
     ok(!exists $hash->{READINGS}{update_version_supported}, 'capability is internal');
     BindingsIo_processCommand($hash, {msgtype => 'version', version_available => '2.1.10',
-                                     version_options => '2.1.10,2.1.9,2.1.4', update_check => 'ok'});
+                                     version_options => '2.1.10,2.1.9,2.1.4', checkUpdate => 'ok'});
+    is(ReadingsVal('binding', 'checkUpdate', ''), 'ok',
+       'check result uses the command name for FHEMWEB inline updates');
     ok(!exists $hash->{READINGS}{version_options}, 'catalog creates no reading');
     is(ReadingsVal('binding', 'version_available', ''), '2.1.10', 'available version remains a reading');
     like(BindingsIo_Set($hash, ['binding', '?'], {}),
@@ -86,7 +88,8 @@ require $module unless defined &BindingsIo_Set;
     like(BindingsIo_Set($hash, ['binding', 'checkUpdate', 'extra'], {}), qr/Usage:/, 'extra check argument rejected');
     like(BindingsIo_Set($hash, ['binding', 'update'], {version => '2.1.4'}), qr/Usage:/, 'unknown named argument rejected');
     is(scalar @sent, $count, 'bad syntax never reaches backend');
-    BindingsIo_processCommand($hash, {msgtype => 'version', update_check => 'failed: timeout'});
+    BindingsIo_processCommand($hash, {msgtype => 'version', checkUpdate => 'failed: timeout'});
+    is(ReadingsVal('binding', 'checkUpdate', ''), 'failed: timeout', 'check errors update the same reading');
     is($hash->{helper}{version_options}, '2.1.10,2.1.9,2.1.4', 'failed check preserves choices');
 
     BindingsIo_doInit($hash);
