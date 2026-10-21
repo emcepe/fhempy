@@ -505,19 +505,20 @@ async def check_update():
     if release_check_lock.locked():
         return
     async with release_check_lock:
-        await _send_version_message(update_check="checking")
+        # Match the Set command so FHEMWEB keeps the page and its event connection.
+        await _send_version_message(checkUpdate="checking")
         try:
             versions = await updates.get_versions(__version__)
         except Exception as error:
             logger.error("Failed to check fhempy updates: %s", error)
             # Preserve the last successful version information on network errors.
             reason = str(error) or type(error).__name__
-            await _send_version_message(update_check=f"failed: {reason}")
+            await _send_version_message(checkUpdate=f"failed: {reason}")
             return
         await _send_version_message(
             version_available=versions[0],
             version_options=",".join(versions),
-            update_check="ok",
+            checkUpdate="ok",
             version_release_notes=(
                 '<html><a href="https://github.com/fhempy/fhempy/releases" target="_blank">'
                 "Release Notes</a></html>"

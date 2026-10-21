@@ -964,7 +964,7 @@ sub BindingsIo_readWebsocketMessage {
     <li><code>checkUpdate</code><br>
       check PyPI (The Python Package Index) now without installing anything.<br>
       Checks also run on connection to FHEM and every twelve hours.<br>
-      The reading <code>update_check</code> reports checking, ok or the error;
+      The reading <code>checkUpdate</code> reports checking, ok or the error;
       its timestamp shows when the last check finished.<br>
       Failed checks preserve the last result.
     </li>

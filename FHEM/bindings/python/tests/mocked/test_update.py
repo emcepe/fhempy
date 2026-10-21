@@ -132,8 +132,8 @@ async def test_manual_check_updates_readings_without_installing(binding):
     pb, ws = binding
     await command(pb, "checkUpdate")
     messages = [json.loads(call.args[0]) for call in ws.send.call_args_list]
-    assert messages[0]["update_check"] == "checking"
-    assert messages[-1]["update_check"] == "ok"
+    assert messages[0]["checkUpdate"] == "checking"
+    assert messages[-1]["checkUpdate"] == "ok"
     assert messages[-1]["version_available"] == "2.1.5"
     assert messages[-1]["version_options"] == "2.1.5,2.1.4"
     assert all(msg["msgtype"] == "version" for msg in messages)
@@ -149,7 +149,7 @@ async def test_failed_check_preserves_last_good_version_information(binding, err
     updates.get_versions.side_effect = error
     await command(pb, "checkUpdate")
     messages = [json.loads(call.args[0]) for call in ws.send.call_args_list]
-    assert messages[-1]["update_check"].startswith("failed: ")
+    assert messages[-1]["checkUpdate"].startswith("failed: ")
     assert all("version_options" not in msg and "version_available" not in msg for msg in messages)
     assert not fhem.release_check_lock.locked()
 
